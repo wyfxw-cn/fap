@@ -3,9 +3,9 @@
 # File Authentication Protocol
 文件验证协议
 
-# 在线网页
+# 文件分享
 
-[文件分享](https://file.wyfxw.cn/ "文件在线分享验证协议")
+[在线分享](https://file.wyfxw.cn/ "文件在线分享验证协议")
 
 # 协议软件
 

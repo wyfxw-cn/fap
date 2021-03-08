@@ -91,7 +91,7 @@
 
 <body>
     <div id="file">
-        <h3>文件验证分享 <a href="https://github.com/wyfxw-cn/fap">fap开源协议</a></h3>
+        <h3>文件验证分享 <a href="https://github.com/wyfxw-cn/fap">FAP开源协议</a></h3>
         <div><textarea id="v_fap"></textarea></div>
         <div>
             <button id="z">转换</button>
@@ -118,6 +118,9 @@
             tip.style.display = "block"
             file.style.display = "none"
         }
+        function loading() {
+
+        }
         function closeTip() {
             file.style.display = "block"
             tip.style.display = 'none'
@@ -133,6 +136,8 @@
                     if (o.code == -4) return showTip('不存在')
                     if (o.code != 200) return showTip('error code.' + o.code)
                     rawfap(o.fap)
+                }).catch(function (error) {
+                    showTip('Error:' + error)
                 })
         }
         function rawfap(fap) {
@@ -182,6 +187,7 @@
         }
         function share() {
             var body = v_hex.value
+            showTip('正在处理,请稍后...')
             fetch('https://api.wyfxw.cn/api/file/fap?fap=' + body.substr(6))
                 .then(function (response) {
                     return response.json();
@@ -189,6 +195,8 @@
                     if (o.code == 402) return showTip('expires时间已过期')
                     if (o.code != 200) return showTip('error code.' + o.code)
                     showTip(`分享成功:<input id='sharelink' value='https://f.wyfxw.cn/?id=${o.id}'><button onclick='copy(sharelink)'>复制</button>`)
+                }).catch(function (error) {
+                    showTip('Error:' + error)
                 })
         }
         function bin2hex(str) {
