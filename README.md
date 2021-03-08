@@ -5,7 +5,7 @@
 
 # 在线网页
 
-[文件在线分享验证协议 https://file.wyfxw.cn/](https://file.wyfxw.cn/ "文件在线分享验证协议")
+[文件分享](https://file.wyfxw.cn/ "文件在线分享验证协议")
 
 # 协议软件
 
