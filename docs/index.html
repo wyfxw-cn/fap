@@ -5,14 +5,10 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="keywords" content="fap协议,fap文件验证,文件分享协议" />
+    <meta name="description" content="fap文件协议(File Authentication Protocol),轻松验证分享文件" />
     <title>FAP文件验证协议</title>
     <style>
-        html,
-        body {
-            height: 100%;
-            margin: 0;
-        }
-
         textarea {
             margin: 0;
             outline: none;
@@ -20,29 +16,220 @@
             padding: 8px;
             border-radius: 8px;
             color: #555;
-        }
-
-        .file {
             width: 100%;
-            height: 97%;
-            margin: 0 auto;
+            height: 300px;
         }
 
-        .file div {
-            width: 50%;
+        input {
+            margin: 0;
+            outline: none;
+            border: 1px solid #ddd;
+            padding: 2px;
+            border-radius: 2px;
+            color: #555;
+            width: 100%;
+        }
+
+        button {
+            border: 1px solid #ddd;
+            margin: 5px;
+            padding: 6px 18px;
+            border-radius: 8px;
+            outline: none;
+            color: white;
+            font-weight: 200;
+            background-color: #00b0ff;
+            width: 80px;
+            height: 40px;
+        }
+
+        button:hover {
+            background-color: #0000ff;
+        }
+
+        button:active {
+            background-color: #ff0000;
+        }
+
+        #tip {
+            position: absolute;
+            width: 100%;
             height: 100%;
-            float: left;
-            overflow: hidden;
+            top: 0;
+            left: 0;
+            background: #ccc;
+            text-align: center;
+            display: none;
+        }
+
+        #tip div {
+            margin: 50px;
+        }
+
+        #z {
+            border-radius: 0 0 40px 40px;
+        }
+
+        #j {
+            border-radius: 40px 40px 0 0;
+        }
+
+        #f {
+            border-radius: 0 20px 20px 0;
+        }
+
+        #c {
+            border-radius: 20px;
+        }
+
+        #file {
+            width: 90%;
+            margin: 0 auto;
         }
     </style>
 </head>
 
 <body>
-    <h1>文件验证分享</h1>
-    <div class="file">
-        <div><textarea></textarea></div>
-        <div><textarea></textarea></div>
+    <div id="file">
+        <h3>文件验证分享</h3>
+        <div><textarea id="v_fap"></textarea></div>
+        <div>
+            <button id="z">转换</button>
+            <button id="j">解析</button>
+            <button id="c">复制</button>
+            <button id="f">分享</button>
+        </div>
+        <div><textarea id="v_hex"></textarea></div>
     </div>
+    <div id='tip'>
+        <div>
+            <div></div>
+            <button onclick="closeTip()">关闭</button>
+        </div>
+    </div>
+    <script>
+        function GetQuery(name) {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+            var r = window.location.search.substr(1).match(reg);
+            if (r != null) return unescape(r[2]); return null;
+        }
+        function showTip(txt) {
+            document.querySelector('#tip div div').innerHTML = txt
+            tip.style.display = "block"
+            file.style.display = "none"
+        }
+        function closeTip() {
+            file.style.display = "block"
+            tip.style.display = 'none'
+        }
+        function getFap(id) {
+            if (id.length != 24) return showTip('id error')
+            fetch('https://api.wyfxw.cn/api/file/fap?id=' + id + '&pwd=' + GetQuery('pwd'))
+                .then(function (response) {
+                    return response.json();
+                }).then(function (o) {
+                    if (o.code == 402) return showTip('已过期')
+                    if (o.code == 401) return showTip('密码错误')
+                    if (o.code == -4) return showTip('不存在')
+                    if (o.code != 200) return showTip('error code.' + o.code)
+                    rawfap(o.fap)
+                })
+        }
+        function rawfap(fap) {
+            v_hex.value = 'fap://' + fap
+            try {
+                v_fap.value = JSON.stringify(JSON.parse(hexFap(v_hex.value)), null, 4)
+            } catch (error) {
+                showTip('解析错误:' + error)
+            }
+        }
+        function check() {
+            if (!window.fetch) return alert('您的浏览器不支持,请使用现代浏览器')
+            var id = GetQuery('id')
+            if (id) {
+                return getFap(id)
+            }
+            var fap = GetQuery('fap')
+            fap = fap || '7b22766572223a22312e30222c226964223a6e756c6c2c22646573223a6e756c6c2c22666c6167223a6e756c6c2c2275736572223a6e756c6c2c22707764223a6e756c6c2c2265787069726573223a313731313737383239352c226c697374223a5b7b226e616d65223a22e7a6bbe695a3e695b0e5ada628e7acac33e789882920e98293e8be89e696872e706466222c22617574686f72223a22e98293e8be89e69687222c2273697a65223a35323037323636382c2273686131223a2263353634636361353031666139663132376136363131656635316539343431353336343961626462222c226d6435223a223863656138363034666936376566656561333663643036333365663661393433222c227331223a2236303330643338353163663235336430346438343432386262373563656431323434303534616138222c227332223a6e756c6c2c227333223a6e756c6c2c227334223a6e756c6c2c226372633332223a223638356464656134222c226372633634223a223135363839343534373336323638333131323531222c2275726c223a6e756c6c2c22746d70223a6e756c6c2c22657874223a22706466222c226d696d65223a226174746163686d656e74222c2274797065223a2266696c65222c22666964223a6e756c6c2c22646964223a6e756c6c2c2263617465676f7279223a22646f63222c2263726561746564223a313631313737383239352c2275706461746564223a313631313737383239352c227374617465223a6e756c6c7d5d7d'
+            if (fap) rawfap(fap)
+        }
+        check()
+        z.onclick = function () {
+            try {
+                var o = JSON.parse(v_fap.value)
+                v_hex.value = fapHex(o)
+                v_fap.value = JSON.stringify(o, null, 4)
+            } catch (error) {
+                showTip('转换错误:' + error)
+            }
+        }
+        j.onclick = function () {
+            try {
+                v_fap.value = JSON.stringify(JSON.parse(hexFap(v_hex.value)), null, 4)
+            } catch (error) {
+                showTip('解析错误:' + error)
+            }
+        }
+        function copy(e) {
+            e.select()
+            document.execCommand('copy')
+        }
+        c.onclick = function () {
+            copy(v_hex)
+        }
+        f.onclick = function () {
+            share()
+        }
+        function share() {
+            var body = v_hex.value
+            fetch('https://api.wyfxw.cn/api/file/fap?fap=' + body.substr(6))
+                .then(function (response) {
+                    return response.json();
+                }).then(function (o) {
+                    if (o.code == 402) return showTip('expires时间已过期')
+                    if (o.code != 200) return showTip('error code.' + o.code)
+                    showTip(`分享成功:<input id='sharelink' value='https://f.wyfxw.cn/?id=${o.id}'><button onclick='copy(sharelink)'>复制</button>`)
+                })
+        }
+        function bin2hex(str) {
+            var ret = '';
+            var r = /[0-9a-zA-Z_.~!*()]/;
+            for (var i = 0, l = str.length; i < l; i++) {
+                if (r.test(str.charAt(i))) {
+                    ret += str.charCodeAt(i).toString(16);
+                } else {
+                    ret += encodeURIComponent(str.charAt(i)).replace(/%/g, '');
+                }
+            }
+            return ret.toLowerCase();
+        }
+        function hex2bin(str) {
+            var ret = '';
+            var tmp = '';
+            for (var i = 0; i < str.length - 1; i += 2) {
+                var c = String.fromCharCode(parseInt(str.substr(i, 2), 16));
+                if (c.charCodeAt() > 127) {
+                    tmp += '%' + str.substr(i, 2);
+                    if (tmp.length == 9) {
+                        ret += decodeURIComponent(tmp);
+                        tmp = '';
+                    }
+                } else {
+                    ret += c;
+                }
+            }
+            return ret;
+        }
+
+        function fapHex(files) {
+            return 'fap://' + bin2hex(JSON.stringify(files))
+        }
+        function hexFap(fap) {
+            if (fap.substr(0, 6) != 'fap://') throw 'neq fap://'
+            fap = fap.substr(6)
+            return hex2bin(fap)
+        }
+    </script>
 </body>
 
 </html>
